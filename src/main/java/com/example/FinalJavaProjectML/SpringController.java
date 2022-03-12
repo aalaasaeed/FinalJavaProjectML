@@ -34,7 +34,7 @@ public class SpringController {
     @GetMapping("/view")
     public String readData() throws IOException, URISyntaxException {
 
-        String path="src/main/resources/Wuzzuf_Jobs.csv";
+        String path="D:\\ITI - AI & Machine Learning\\18- Java For Machine Learning\\FinalJavaProjectML\\FinalJavaProjectML\\src\\main\\resources\\Wuzzuf_Jobs.csv";
         CSVFormat format = CSVFormat.DEFAULT.withFirstRecordAsHeader ();
         this.df = Read.csv (path, format);
 
@@ -88,9 +88,9 @@ public class SpringController {
         String web = String.format("<h1 style=\"text-align:center;font-family:verdana;background-color:FF8AAE;\">%s</h1>", "Data Cleaning") +
                 "<table style=\"width:100%;text-align: center\">" ;
         web += String.format("<h2 style=\"text-align:center;\"> Total Number of Records Before Removing Null values = %d</h2>", df.stream().count());
-        web += String.format("<h2 style=\"text-align:center;\"> Total Number of Records After Removing Null values  = %d</h2>", df.stream().count() - nonNullData.stream().count());
-        web+=String.format("<h2 style=\"text-align:center;\"> Total records = %d</h2>", nonNullData.size() );
-        web+=String.format("<h2 style=\"text-align:center;\"> Total records after duplication = %d</h2>", withoutDupes.size() );
+        web += String.format("<h2 style=\"text-align:center;\"> Total Number of Records After Removing Null values  = %d</h2>", nonNullData.size());
+        web+=String.format("<h2 style=\"text-align:center;\"> Number of Null Rows = %d</h2>", df.stream().count() - nonNullData.stream().count()) ;
+
 
 
         return web;
@@ -296,7 +296,7 @@ public class SpringController {
     public void Showpiechart (List<String> companies, List<Integer> counts) {
 
         PieChart chart = new PieChartBuilder().width(1500).height(900).title("Count the jobs for each company (Pie Chart )").build();
-        int limit = 25;
+        int limit = 10;
         for (int i = 0; i < limit; i++) {
             chart.addSeries(companies.get(i), counts.get(i));
         }
@@ -312,7 +312,8 @@ public class SpringController {
         CategoryChart chart = new CategoryChartBuilder().width(800).height(600).title("JobsTitles").xAxisTitle("Job Titles").yAxisTitle("Count").build();
         chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNW);
         chart.getStyler().setHasAnnotations(true);
-        chart.addSeries ("Counts Of Job Titles ",jobTitles.stream().limit(15).collect(Collectors.toList()), counts.stream().limit(15).collect(Collectors.toList()));
+
+        chart.addSeries ("Counts Of Job Titles ",jobTitles.stream().limit(5).collect(Collectors.toList()), counts.stream().limit(5).collect(Collectors.toList()));
         try {
             BitmapEncoder.saveBitmapWithDPI(chart, "./barChart_titles", BitmapEncoder.BitmapFormat.PNG, 300);
         } catch (IOException e) {
@@ -327,7 +328,8 @@ public class SpringController {
         CategoryChart chart = new CategoryChartBuilder().width(800).height(600).title("Areas").xAxisTitle("Areas").yAxisTitle("Count").build();
         chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNW);
         chart.getStyler().setHasAnnotations(true);
-        chart.addSeries ("Counts Of Areas ",Areas.stream().limit(15).collect(Collectors.toList()), counts.stream().limit(15).collect(Collectors.toList()));
+        chart.getStyler ().setStacked (true);
+        chart.addSeries ("Counts Of Areas ",Areas.stream().limit(5).collect(Collectors.toList()), counts.stream().limit(5).collect(Collectors.toList()));
         try {
             BitmapEncoder.saveBitmapWithDPI(chart, "./barchart_areas", BitmapEncoder.BitmapFormat.PNG, 300);
         } catch (IOException e) {
@@ -340,7 +342,7 @@ public class SpringController {
     public void showMostRepeatedSkillsPieChart(List<String> skills, List<Integer> counts) {
 
         PieChart chart = new PieChartBuilder().width(1500).height(900).title("Most Repeated Skills  (Pie Chart )").build();
-        int limit = 25;
+        int limit = 10;
         for (int i = 0; i <= limit; i++) {
             chart.addSeries(skills.get(i), counts.get(i));
         }
