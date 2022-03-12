@@ -34,7 +34,7 @@ public class SpringController {
     @GetMapping("/view")
     public String readData() throws IOException, URISyntaxException {
 
-        String path="D:\\ITI - AI & Machine Learning\\18- Java For Machine Learning\\FinalJavaProjectML\\FinalJavaProjectML\\src\\main\\resources\\Wuzzuf_Jobs.csv";
+        String path="src/main/resources/Wuzzuf_Jobs.csv";
         CSVFormat format = CSVFormat.DEFAULT.withFirstRecordAsHeader ();
         this.df = Read.csv (path, format);
 
@@ -83,6 +83,7 @@ public class SpringController {
         String r = readData();
         DataFrame withoutDupes = DataFrame.of(df.stream().distinct().collect(Collectors.toList()));
         DataFrame nonNullData = DataFrame.of(withoutDupes.stream().filter(row -> !row.getString("YearsExp").equals("null Yrs of Exp")));
+
         System.out.println ("Number of non Null rows is: "+nonNullData.nrows ());
         String web = String.format("<h1 style=\"text-align:center;font-family:verdana;background-color:FF8AAE;\">%s</h1>", "Data Cleaning") +
                 "<table style=\"width:100%;text-align: center\">" ;
@@ -112,9 +113,13 @@ public class SpringController {
 
     public List<Job> GetAllData() {
         List<Job> AllJobs=new ArrayList<>();
-        ListIterator<Tuple> iterator = df.stream ().collect (Collectors.toList ()).listIterator ();
-        List<Tuple> withoutDupes = df.stream().distinct().collect(Collectors.toList());
-        int i = withoutDupes.size();
+
+        DataFrame withoutDupes = DataFrame.of(df.stream().distinct().collect(Collectors.toList()));
+        DataFrame nonNullData = DataFrame.of(withoutDupes.stream().filter(row -> !row.getString("YearsExp").equals("null Yrs of Exp")));
+
+        ListIterator<Tuple> iterator = nonNullData.stream ().collect (Collectors.toList ()).listIterator ();
+
+        int i = nonNullData.size();
         while (iterator.hasNext () && i>0) {
             Tuple t = iterator.next ();
             Job p = new Job ((String)t.get ("Title"),(String)t.get ("Company"),(String)t.get ("Location"),(String)t.get ("Type"),
