@@ -34,7 +34,7 @@ public class SpringController {
     @GetMapping("/view")
     public String readData() throws IOException, URISyntaxException {
 
-        String path="D:\\ITI - AI & Machine Learning\\18- Java For Machine Learning\\FinalJavaProjectML\\FinalJavaProjectML\\src\\main\\resources\\Wuzzuf_Jobs.csv";
+        String path="src/main/resources/Wuzzuf_Jobs.csv";
         CSVFormat format = CSVFormat.DEFAULT.withFirstRecordAsHeader ();
         this.df = Read.csv (path, format);
 
@@ -122,6 +122,44 @@ public class SpringController {
         }
         return AllJobs;
     }
+
+    @GetMapping("/countJob")
+    public String CountJobsForEachCompany () throws IOException, URISyntaxException {
+        String r = readData();
+        List<Job> ALLDATA = GetAllData();
+        HashMap<String, Integer> CountCompany = new HashMap<>();
+        for(Job job : ALLDATA){
+            if (CountCompany.containsKey(job.getCompany())){
+                CountCompany.put(job.getCompany(), CountCompany.get(job.getCompany()) + 1);
+            }
+            else{
+                CountCompany.put(job.getCompany(), 1);
+            }
+        }
+        HashMap<String, Integer> AfterSorting = SortByValue(CountCompany);
+
+        List<String> companies = new ArrayList<>();
+        List<Integer> counts = new ArrayList<>();
+        short n = 0;
+        for (String a : AfterSorting.keySet()) {
+            companies.add(a);
+            counts.add(AfterSorting.get(a));
+            n++;
+
+        }
+        Showpiechart(companies , counts);
+        Iterator<String> companiesIterator = companies.iterator();
+        Iterator<Integer> countsIterator = counts.iterator();
+        String html = String.format("<h1 style=\"text-align:center;font-family:verdana;background-color:FF8AAE;\">%s</h1>", "Count the jobs for each company ") +
+                "<h3 style=\"text-align:center;font-family:verdana;background-color:FF8AAE;\">The most demanding companies for jobs is :  " + companies.get(0) + "</h3>" +
+                "<table style=\"width:100%;text-align: center;border: 1px solid\">" +
+                "<tr style=\"border: 1px solid\"><th style=\"border: 1px solid\">Company</th><th style=\"border: 1px solid\">Count</th></tr>";
+        while (companiesIterator.hasNext() && countsIterator.hasNext()) {
+            html += "<tr style=\"border: 1px solid\">\n" +"<td style=\"border: 1px solid\">"+companiesIterator.next()+"</td>\n" +"<td style=\"border: 1px solid\">"+countsIterator.next()+"</td>\n" + "  </tr>";
+        }
+
+        return html;
+    }
     @GetMapping("/skills")
     public String mostRepeatedSkills() throws IOException, URISyntaxException {
         String r = readData();
@@ -180,7 +218,7 @@ public class SpringController {
             chart.addSeries(companies.get(i), counts.get(i));
         }
         try {
-            BitmapEncoder.saveBitmapWithDPI(chart, "./PieChart_compaines", BitmapEncoder.BitmapFormat.PNG, 300);
+            BitmapEncoder.saveBitmapWithDPI(chart, "src/main/resources/PieChart_compaines", BitmapEncoder.BitmapFormat.PNG, 300);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -235,7 +273,7 @@ public class SpringController {
 
         byte[] image = new byte[0];
         try {
-            image = FileUtils.readFileToByteArray(new File("D:\\ITI - AI & Machine Learning\\18- Java For Machine Learning\\FinalJavaProjectML\\PieChart_compaines.png"));
+            image = FileUtils.readFileToByteArray(new File("src/main/resources/PieChart_compaines.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
