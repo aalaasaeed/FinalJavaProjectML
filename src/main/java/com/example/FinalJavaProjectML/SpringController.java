@@ -34,7 +34,7 @@ public class SpringController {
     @GetMapping("/view")
     public String readData() throws IOException, URISyntaxException {
 
-        String path="src/main/resources/Wuzzuf_Jobs.csv";
+        String path="D:\\ITI - AI & Machine Learning\\18- Java For Machine Learning\\FinalJavaProjectML\\FinalJavaProjectML\\src\\main\\resources\\Wuzzuf_Jobs.csv";
         CSVFormat format = CSVFormat.DEFAULT.withFirstRecordAsHeader ();
         this.df = Read.csv (path, format);
 
@@ -162,6 +162,82 @@ public class SpringController {
 
         return html;
     }
+    @GetMapping("/JobTitles")
+    public String mostPopularJobTitles() throws IOException, URISyntaxException {
+        String r = readData();
+        List<Job> ALLDATA = GetAllData();
+        HashMap<String, Integer> CountJobTitles = new HashMap<>();
+        for(Job job : ALLDATA){
+            if (CountJobTitles.containsKey(job.getTitle())){
+                CountJobTitles.put(job.getTitle(), CountJobTitles.get(job.getTitle()) + 1);
+            }
+            else{
+                CountJobTitles.put(job.getTitle(), 1);
+            }
+        }
+        HashMap<String, Integer> AfterSorting = SortByValue(CountJobTitles);
+
+        List<String> JobTitles = new ArrayList<>();
+        List<Integer> counts = new ArrayList<>();
+        short n = 0;
+        for (String a : AfterSorting.keySet()) {
+            JobTitles.add(a);
+            counts.add(AfterSorting.get(a));
+            n++;
+
+        }
+        showJobsTitleBarChart(JobTitles , counts);
+        Iterator<String> titlesIterator = JobTitles.iterator();
+        Iterator<Integer> countsIterator = counts.iterator();
+        String web = String.format("<h1 style=\"text-align:center;font-family:verdana;background-color:FF8AAE;\">%s</h1>", "Job Titles ") +
+                "<h3 style=\"text-align:center;font-family:verdana;background-color:FF8AAE;\">The most popular job titles: " + JobTitles.get(0) + "</h3>" +
+                "<table style=\"width:100%;text-align: center;border: 1px solid\">";
+        web +=  "<tr style=\"border: 1px solid\"><th style=\"border: 1px solid\">JobTitles</th><th style=\"border: 1px solid\">Count</th></tr>";
+        while (titlesIterator.hasNext() && countsIterator.hasNext()) {
+            web += "<tr style=\"border: 1px solid\">\n" +"<td style=\"border: 1px solid\">"+titlesIterator.next()+"</td>\n" +"<td style=\"border: 1px solid\">"+countsIterator.next()+"</td>\n" + "  </tr>";
+        }
+        return web;
+    }
+
+    @GetMapping("/popularAreas")
+    public String mostPopularAreas() throws IOException, URISyntaxException {
+        String r = readData();
+        List<Job> ALLDATA = GetAllData();
+        HashMap<String, Integer> CountAreas= new HashMap<>();
+        for(Job job : ALLDATA){
+            if (CountAreas.containsKey(job.getLocation())){
+                CountAreas.put(job.getLocation(), CountAreas.get(job.getLocation()) + 1);
+            }
+            else{
+                CountAreas.put(job.getLocation(), 1);
+            }
+        }
+        HashMap<String, Integer> AfterSorting = SortByValue(CountAreas);
+
+        List<String> Areas = new ArrayList<>();
+        List<Integer> counts = new ArrayList<>();
+        short n = 0;
+        for (String a : AfterSorting.keySet()) {
+            Areas.add(a);
+            counts.add(AfterSorting.get(a));
+            n++;
+
+        }
+        showAreasBarChart(Areas , counts);
+        Iterator<String> AreasIterator = Areas.iterator();
+        Iterator<Integer> countsIterator = counts.iterator();
+
+        String web = String.format("<h1 style=\"text-align:center;font-family:verdana;background-color:FF8AAE;\">%s</h1>", "Areas ") +
+                "<h3 style=\"text-align:center;font-family:verdana;background-color:FF8AAE;\">The most Poplar Area : " + Areas.get(0) + "</h3>" +
+                "<table style=\"width:100%;text-align: center;border: 1px solid\">";
+        web +=  "<tr style=\"border: 1px solid\"><th style=\"border: 1px solid\">JobTitles</th><th style=\"border: 1px solid\">Count</th></tr>";
+        while (AreasIterator.hasNext() && countsIterator.hasNext()) {
+            web += "<tr style=\"border: 1px solid\" >\n" +"<td style=\"border: 1px solid\">"+AreasIterator.next()+"</td>\n" +"<td style=\"border: 1px solid\">"+countsIterator.next()+"</td>\n" + "  </tr>";
+        }
+        return web;
+
+    }
+
     @GetMapping("/skills")
     public String mostRepeatedSkills() throws IOException, URISyntaxException {
         String r = readData();
@@ -220,7 +296,7 @@ public class SpringController {
             chart.addSeries(companies.get(i), counts.get(i));
         }
         try {
-            BitmapEncoder.saveBitmapWithDPI(chart, "src/main/resources/PieChart_compaines", BitmapEncoder.BitmapFormat.PNG, 300);
+            BitmapEncoder.saveBitmapWithDPI(chart, "D:\\ITI - AI & Machine Learning\\18- Java For Machine Learning\\FinalJavaProjectML\\PieChart_compaines.png", BitmapEncoder.BitmapFormat.PNG, 300);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -275,7 +351,7 @@ public class SpringController {
 
         byte[] image = new byte[0];
         try {
-            image = FileUtils.readFileToByteArray(new File("src/main/resources/PieChart_compaines.png"));
+            image = FileUtils.readFileToByteArray(new File("./PieChart_compaines.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
