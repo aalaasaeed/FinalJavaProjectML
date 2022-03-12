@@ -122,6 +122,49 @@ public class SpringController {
         }
         return AllJobs;
     }
+    @GetMapping("/skills")
+    public String mostRepeatedSkills() throws IOException, URISyntaxException {
+        String r = readData();
+        List<Job> ALLDATA = GetAllData();
+        HashMap<String, Integer> CountSkills = new HashMap<>();
+        for(Job job : ALLDATA){
+            String [] temp = job.getSkills().split(",");
+            for(String s : temp){
+                if (CountSkills.containsKey(s)){
+                    CountSkills.put(s, CountSkills.get(s) + 1);
+                }
+                else{
+                    CountSkills.put(s, 1);
+                }
+            }
+        }
+        HashMap<String, Integer> AfterSorting = SortByValue(CountSkills);
+
+        List<String> skills = new ArrayList<>();
+        List<Integer> counts = new ArrayList<>();
+        short n = 0;
+        for (String a : AfterSorting.keySet()) {
+            skills.add(a);
+            counts.add(AfterSorting.get(a));
+            n++;
+
+        }
+        showMostRepeatedSkillsPieChart(skills , counts);
+        Iterator<String> skillsIterator = skills.iterator();
+        Iterator<Integer> countsIterator = counts.iterator();
+
+        String web = String.format("<h1 style=\"text-align:center;font-family:verdana;background-color:FF8AAE;\">%s</h1>", "Skills") +
+                "<h3 style=\"text-align:center;font-family:verdana;background-color:FF8AAE;\">The most repeated Skill :  " + skills.get(0) + "</h3>" +
+                "<table style=\"width:100%;text-align: center;border: 1px solid\">";
+        web +=  "<tr style=\"border: 1px solid\"><th style=\"border: 1px solid\">Skills</th><th style=\"border: 1px solid\">Count</th></tr>";
+        while (skillsIterator.hasNext() && countsIterator.hasNext()) {
+            web += "<tr style=\"border: 1px solid\">\n" +"<td style=\"border: 1px solid\">"+skillsIterator.next()+"</td>\n" +"<td style=\"border: 1px solid\">"+countsIterator.next()+"</td>\n" + "  </tr>";
+        }
+        return web;
+
+
+    }
+
 
 
 
