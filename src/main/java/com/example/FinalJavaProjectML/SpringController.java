@@ -81,21 +81,23 @@ public class SpringController {
     @GetMapping("/cleanData")
     public String cleanWuzzufData() throws IOException, URISyntaxException {
         String r = readData();
-        DataFrame nonNullData= df.omitNullRows ();
-        List<Tuple> withoutDupes = df.stream().distinct().collect(Collectors.toList());
+        DataFrame withoutDupes = DataFrame.of(df.stream().distinct().collect(Collectors.toList()));
+        DataFrame nonNullData = DataFrame.of(withoutDupes.stream().filter(row -> !row.getString("YearsExp").equals("null Yrs of Exp")));
         System.out.println ("Number of non Null rows is: "+nonNullData.nrows ());
         String web = String.format("<h1 style=\"text-align:center;font-family:verdana;background-color:FF8AAE;\">%s</h1>", "Data Cleaning") +
                 "<table style=\"width:100%;text-align: center\">" ;
         web += String.format("<h2 style=\"text-align:center;\"> Total Number of Records Before Removing Null values = %d</h2>", df.stream().count());
         web += String.format("<h2 style=\"text-align:center;\"> Total Number of Records After Removing Null values  = %d</h2>", df.stream().count() - nonNullData.stream().count());
-        web+=String.format("<h2 style=\"text-align:center;\"> Total records = %d</h2>", withoutDupes.size() );
+        web+=String.format("<h2 style=\"text-align:center;\"> Total records = %d</h2>", nonNullData.size() );
+        web+=String.format("<h2 style=\"text-align:center;\"> Total records after duplication = %d</h2>", withoutDupes.size() );
+
 
         return web;
     }
 
     public LinkedHashMap<String, Integer> SortByValue (HashMap<String, Integer> ToSortCompany) {
         List<Map.Entry<String, Integer> > list = new LinkedList<Map.Entry<String, Integer> >(ToSortCompany.entrySet());
-        Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
+        list.sort(new Comparator<Map.Entry<String, Integer>>() {
             @Override
             public int compare(Map.Entry<String, Integer> es1, Map.Entry<String, Integer> es2) {
                 return es2.getValue().compareTo(es1.getValue());
