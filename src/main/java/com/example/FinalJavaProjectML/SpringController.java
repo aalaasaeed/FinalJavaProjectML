@@ -34,7 +34,7 @@ public class SpringController {
     @GetMapping("/view")
     public String readData() throws IOException, URISyntaxException {
 
-        String path="D:\\ITI - AI & Machine Learning\\18- Java For Machine Learning\\FinalJavaProjectML\\FinalJavaProjectML\\src\\main\\resources\\Wuzzuf_Jobs.csv";
+        String path="E:\\ITI\\ITI AI Track Study\\ITI laptop\\Java Machine Learning\\Project\\NewProjectSourceCode1\\src\\main\\resources\\Wuzzuf_Jobs.csv";
         CSVFormat format = CSVFormat.DEFAULT.withFirstRecordAsHeader ();
         this.df = Read.csv (path, format);
 
@@ -204,6 +204,7 @@ public class SpringController {
         return web;
     }
 
+// Displays the most popular Areas.
     @GetMapping("/popularAreas")
     public String mostPopularAreas() throws IOException, URISyntaxException {
         String r = readData();
