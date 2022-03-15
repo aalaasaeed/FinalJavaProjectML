@@ -34,7 +34,7 @@ public class SpringController {
     @GetMapping("/view")
     public String readData() throws IOException, URISyntaxException {
 
-        String path="E:\\ITI\\ITI AI Track Study\\ITI laptop\\Java Machine Learning\\Project\\NewProjectSourceCode1\\src\\main\\resources\\Wuzzuf_Jobs.csv";
+        String path="D:\\ITI - AI & Machine Learning\\18- Java For Machine Learning\\FinalJavaProjectML\\FinalJavaProjectML\\src\\main\\resources\\Wuzzuf_Jobs.csv";
         CSVFormat format = CSVFormat.DEFAULT.withFirstRecordAsHeader ();
         this.df = Read.csv (path, format);
 
@@ -302,7 +302,7 @@ public class SpringController {
             chart.addSeries(companies.get(i), counts.get(i));
         }
         try {
-            BitmapEncoder.saveBitmapWithDPI(chart, "D:\\ITI - AI & Machine Learning\\18- Java For Machine Learning\\FinalJavaProjectML\\PieChart_compaines.png", BitmapEncoder.BitmapFormat.PNG, 300);
+            BitmapEncoder.saveBitmapWithDPI(chart, "./PieChart_compaines.png", BitmapEncoder.BitmapFormat.PNG, 300);
         } catch (IOException e) {
             e.printStackTrace();
         }
