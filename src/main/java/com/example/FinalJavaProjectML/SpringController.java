@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import smile.data.DataFrame;
 import smile.data.Tuple;
+import smile.data.measure.NominalScale;
+import smile.data.vector.IntVector;
 import smile.io.Read;
 
 
@@ -39,8 +41,8 @@ public class SpringController {
         this.df = Read.csv (path, format);
 
         ListIterator<Tuple> iterator = this.df.stream ().collect (Collectors.toList ()).listIterator ();
-        System.out.println(this.df.summary ());
-        System.out.println(this.df.schema ());
+        //System.out.println(this.df.summary ());
+        //System.out.println(this.df.schema ());
         int i=4380;
         while (iterator.hasNext () && i>0) {
             Tuple t = iterator.next ();
@@ -65,11 +67,11 @@ public class SpringController {
     @GetMapping("/describe")
     public String getSummary() throws IOException, URISyntaxException {
         String r = readData();
-        String []schemaa = df.schema().toString().replace("[","").replace("]","").split(",");
+        String []schemaa = this.df.schema().toString().replace("[","").replace("]","").split(",");
 
         String web = String.format("<h1 style=\"text-align:center;font-family:verdana;background-color:FF8AAE;\">%s</h1>", "Summary and Scehma of Wuzzuf Data ") +
                 "<table style=\"width:100%;text-align: center\"> <br> <br>" ;
-        web += String.format("<h3 style=\"text-align:center;\"> Total Number of Records in Wuzzuf Data = %d</h3>", df.stream().count());
+        web += String.format("<h3 style=\"text-align:center;\"> Total Number of Records in Wuzzuf Data = %d</h3>", this.df.stream().count());
         web += "<h2 style=\"text-align:center;\"> Schema of Wuzzuf Data  </h2>";
         for (String s : schemaa){
             web+= String.format("<h2 style=\"text-align:center;\">  %s</h2>", s);
@@ -77,19 +79,19 @@ public class SpringController {
 
         return web;
     }
-
     @GetMapping("/cleanData")
     public String cleanWuzzufData() throws IOException, URISyntaxException {
         String r = readData();
-        DataFrame withoutDupes = DataFrame.of(df.stream().distinct().collect(Collectors.toList()));
-        DataFrame nonNullData = DataFrame.of(withoutDupes.stream().filter(row -> !row.getString("YearsExp").equals("null Yrs of Exp")));
+        DataFrame old_df = this.df;
+        this.df = DataFrame.of(this.df.stream().distinct().collect(Collectors.toList()));
+        this.df = DataFrame.of(this.df.stream().filter(row -> !row.getString("YearsExp").equals("null Yrs of Exp")));
 
-        System.out.println ("Number of non Null rows is: "+nonNullData.nrows ());
+        System.out.println ("Number of non Null rows is: "+this.df.nrows ());
         String web = String.format("<h1 style=\"text-align:center;font-family:verdana;background-color:FF8AAE;\">%s</h1>", "Data Cleaning") +
                 "<table style=\"width:100%;text-align: center\">" ;
-        web += String.format("<h2 style=\"text-align:center;\"> Total Number of Records Before Removing Null values = %d</h2>", df.stream().count());
-        web += String.format("<h2 style=\"text-align:center;\"> Total Number of Records After Removing Null values  = %d</h2>", nonNullData.size());
-        web+=String.format("<h2 style=\"text-align:center;\"> Number of Null Rows = %d</h2>", df.stream().count() - nonNullData.stream().count()) ;
+        web += String.format("<h2 style=\"text-align:center;\"> Total Number of Records Before Removing Null values = %d</h2>", old_df.stream().count());
+        web += String.format("<h2 style=\"text-align:center;\"> Total Number of Records After Removing Null values  = %d</h2>", this.df.size());
+        web+=String.format("<h2 style=\"text-align:center;\"> Number of Null Rows = %d</h2>", old_df.stream().count() - this.df.stream().count()) ;
 
 
 
@@ -397,6 +399,47 @@ public class SpringController {
             e.printStackTrace();
         }
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(image);
+    }
+    public int[] factorization(String columnName)
+    {
+        String[] values = df.stringVector (columnName).distinct ().toArray (new String[]{});
+        return df.stringVector (columnName).factorize (new NominalScale(values)).toIntArray ();
+
+    }
+    @GetMapping("/factorize")
+    public String factorizeYrsOfExp()
+    {
+
+        this.df = this.df.merge(IntVector.of("YearsExpFact", factorization("YearsExp")));
+        String html = String.format("<h1 style=\"text-align:center;font-family:verdana;background-color:FF8AAE;\">%s</h1>", "Factorize Years of Exp ") +
+                "<table style=\"width:100%;text-align: center;border: 1px solid\">" +
+                "<tr style=\"border: 1px solid\"><th style=\"border: 1px solid\">String</th><th style=\"border: 1px solid\">Factorized</th></tr>";
+
+        ListIterator<Tuple> iterator = this.df.stream ().collect (Collectors.toList ()).listIterator ();
+
+        while (iterator.hasNext()) {
+            Tuple t = iterator.next ();
+            html += "<tr>\n" +"<td>"+(String) t.get("YearsExp") +"</td>\n" +"<td>"+ t.get("YearsExpFact")+"</td>\n" +"</tr>";
+
+        }
+
+        return html;
+    }
+
+    @GetMapping("/getDataHtml")
+    public String get_html_data(){
+
+        List<Job> ALLDATA = GetAllData();
+        String html = String.format("<h1 style=\"text-align:center;font-family:verdana;background-color:FF8AAE;\">%s</h1>", "Sample of Wuzzuf Data ") +
+                "<table style=\"width:100%;text-align: center ; border: 1px solid;\"> <br><br>" +
+                "<tr style = \"border: 1px solid\"><th style = \"border: 1px solid\">Title</th ><th style = \"border: 1px solid\">Company</th><th style = \"border: 1px solid\">Location</th style = \"border: 1px solid\"><th style = \"border: 1px solid\">Type</th><th style = \"border: 1px solid\">Level</th><th style = \"border: 1px solid\">YearsExp</th><th style = \"border: 1px solid\">Country</th><th style = \"border: 1px solid\">Skills</th></tr>";
+        for (Job j: ALLDATA){
+            html += "<tr style = \"border: 1px solid\">\n" +"<td style = \"border: 1px solid\">"+j.getTitle()+"</td>\n" +"<td style = \"border: 1px solid\">"+j.getCompany()+"</td>\n" +"<td style = \"border: 1px solid\">"+j.getLocation()+"</td>\n"
+                    +"<td style = \"border: 1px solid\">"+ j.getType() +"</td>\n" +"<td style = \"border: 1px solid\">"+j.getLevel()+"</td>\n" +"<td style = \"border: 1px solid\">"+j.getYears_EXP()+"</td>\n"+"<td style = \"border: 1px solid\">"+j.getCountry()+"</td>\n"+"<td style = \"border: 1px solid\">"+j.getSkills()
+                    +"</td>\n"+"  </tr>";
+        }
+
+        return html;
     }
 
 
