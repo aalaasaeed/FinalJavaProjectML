@@ -1,4 +1,4 @@
-# ITI-Java-Course-Project-Final
+# ITI-Java-Course-Final-Project
 
 The data set used in this project was provided by Wuzzuf jobs in Egypt data set at Kaggle :
 https://www.kaggle.com/omarhanyy/wuzzuf-jobs
